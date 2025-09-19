@@ -1,0 +1,42 @@
+### Crear un usuario
+POST http://localhost:3000/users
+Content-Type: application/json
+
+{
+  "nombre": "Manu",
+  "apellidos": "Perez",
+  "telefono": "123456789",
+  "gmail": "manu@gmail.com",
+  "password": "12345asdfg"
+}
+
+### Listar todos los usuarios
+GET http://localhost:3000/users
+
+### Actualizar usuario con id=1
+PUT http://localhost:3000/users/1
+Content-Type: application/json
+
+{
+  "nombre": "Manuel",
+  "apellidos": "Gonzalez",
+  "telefono": "987654321",
+  "gmail": "manuel.gonzalez@gmail.com",
+  "password": "nuevaContraseña123"
+}
+
+### Crear una medición
+POST http://localhost:3000/mediciones
+Content-Type: application/json
+
+{
+  "medicion1": 23.5,
+  "medicion2": 45.2,
+  "medicion3": 12.8,
+  "user": 1,
+  "hora": "2025-09-19 12:30:00",
+  "localizacion": "Madrid"
+}
+
+### Listar todas las mediciones
+GET http://localhost:3000/mediciones
