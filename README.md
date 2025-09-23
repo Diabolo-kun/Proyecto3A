@@ -17,3 +17,5 @@ Instalacion:
         npm install bcrypt
     Y finalmente para ejecutar la API, ejecutar el comando:
         node index.js
+2-Arduino
+3-Android

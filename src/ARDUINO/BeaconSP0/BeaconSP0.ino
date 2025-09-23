@@ -1,13 +1,16 @@
 #include <bluefruit.h>
-#undef min 
+#undef min
 #undef max
 
 #include "LED.h"
 #include "PuertoSerie.h"
-
 #include "EmisoraBLE.h"
 #include "Publicador.h"
 #include "Medidor.h"
+#include "ServicioEnEmisora.h"
+
+// Definición del static
+const uint8_t ServicioEnEmisora::uuidServicio[16];
 
 // ----------------------------
 // Variables configurables
@@ -18,10 +21,17 @@ int intervaloAnuncio = 1000;
 int txPower = 4;  // dBm
 
 // ----------------------------
+// Variables BLE
+// ----------------------------
+ServicioEnEmisora servicioSensor;
+ServicioEnEmisora::Caracteristica caracteristicaCO2("CO2", CHR_PROPS_READ | CHR_PROPS_NOTIFY, SECMODE_OPEN, SECMODE_NO_ACCESS, 2);
+ServicioEnEmisora::Caracteristica caracteristicaTemp("TEMP", CHR_PROPS_READ | CHR_PROPS_NOTIFY, SECMODE_OPEN, SECMODE_NO_ACCESS, 2);
+
+// ----------------------------
 namespace Globales {
   LED elLED(7);
   PuertoSerie elPuerto(115200);
-  Publicador elPublicador(dispositivoNombre.c_str(), 0x004c, txPower);
+  Publicador elPublicador;
   Medidor elMedidor;
 }
 
@@ -38,7 +48,6 @@ void mostrarMenu() {
   Serial.print(F("Selecciona opcion: "));
 }
 
-// ----------------------------
 void configurarBeacon() {
   bool configurando = true;
   while (configurando) {
@@ -91,15 +100,29 @@ void setup() {
   Serial.println(F("Iniciando configuracion..."));
   configurarBeacon();
 
-  // Usar configuración
-  Globales::elPublicador.laEmisora = EmisoraBLE(dispositivoNombre.c_str(), 0x004c, txPower);
+  // Crear EmisoraBLE y asignarla al Publicador
+  EmisoraBLE* emisora = new EmisoraBLE(dispositivoNombre.c_str(), 0x004c, txPower);
+  Globales::elPublicador.setEmisora(emisora);
   Globales::elPublicador.encenderEmisora();
+
+  // Añadir características al servicio y activar
+  servicioSensor.anyadirCaracteristica(caracteristicaCO2);
+  servicioSensor.anyadirCaracteristica(caracteristicaTemp);
+  servicioSensor.activarServicio();
 }
 
 // ----------------------------
 void loop() {
-  // Ejemplo: enviar beacon con mensaje personalizado
-  Globales::elPublicador.laEmisora.emitirAnuncioIBeaconLibre(beaconMensaje.c_str(), beaconMensaje.length());
+  // Enviar beacon con mensaje personalizado
+  Globales::elPublicador.getEmisora()->emitirAnuncioIBeaconLibre(beaconMensaje.c_str(), beaconMensaje.length());
   delay(intervaloAnuncio);
-  Globales::elPublicador.laEmisora.detenerAnuncio();
+  Globales::elPublicador.getEmisora()->detenerAnuncio();
+
+  // Actualizar características BLE
+  int16_t valorCO2 = Globales::elMedidor.medirCO2();
+  int16_t valorTemp = Globales::elMedidor.medirTemperatura();
+
+  caracteristicaCO2.escribirDatos(&valorCO2, sizeof(valorCO2));
+  caracteristicaTemp.escribirDatos(&valorTemp, sizeof(valorTemp));
+
 }
