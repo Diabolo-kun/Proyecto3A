@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Tema principal de la app -->
+    <style name="Theme.DetBLE" parent="Theme.AppCompat.Light.NoActionBar">
+        <!-- Colores de ejemplo, cámbialos según tu paleta -->
+        <item name="colorPrimary">@color/purple_500</item>
+        <item name="colorPrimaryDark">@color/purple_700</item>
+        <item name="colorAccent">@color/teal_200</item>
+    </style>
+</resources>

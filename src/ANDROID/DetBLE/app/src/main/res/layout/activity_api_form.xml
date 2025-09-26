@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- IP -->
+        <EditText
+            android:id="@+id/ipInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="IP del servidor (ej: 192.168.1.42)" />
+
+        <!-- Campos del POST -->
+        <EditText
+            android:id="@+id/tipomedicionInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="tipomedicion (int)"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/contadorInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="contador (opcional)"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/medicionInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="medicion (float)"
+            android:inputType="numberDecimal" />
+
+        <EditText
+            android:id="@+id/userInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="user (int)"
+            android:inputType="number" />
+
+        <EditText
+            android:id="@+id/horaInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="hora (YYYY-MM-DD)"
+            android:inputType="date" />
+
+        <EditText
+            android:id="@+id/localizacionInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="localizacion (texto)" />
+
+        <!-- Botones -->
+        <Button
+            android:id="@+id/btnGetMediciones"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="GET /mediciones" />
+
+        <Button
+            android:id="@+id/btnPostMedicion"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="POST /mediciones" />
+
+        <!-- Respuesta -->
+        <TextView
+            android:id="@+id/txtResponse"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:padding="8dp"
+            android:background="#EEEEEE"
+            android:scrollbars="vertical"
+            android:text="Respuesta del servidor..." />
+
+    </LinearLayout>
+</ScrollView>
