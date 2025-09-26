@@ -1,150 +1,97 @@
-/**
-npm init -y
-npm install express
-npm install mysql2
-npm install bcrypt
-node index.js
-*/const express = require('express');
-const app = express();
-const PORT = 3000;
-const db = require('./db');
+// index.js
+// API que usa logica.js y Express
+
+const express = require('express');
 const bcrypt = require('bcrypt');
+const db = require('./db');      // tu conexión real con mysql2
+const logica = require('./logica');
+
+const app = express();
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 
-console.log(`init`);
+/* ---------- USERS ---------- */
 
-// ------------------- USERS -------------------
-
-// Crear un usuario (POST /users)
+// Crear usuario
 app.post('/users', async (req, res) => {
   const { nombre, apellidos, telefono, gmail, password } = req.body;
-
   if (!nombre || !apellidos || !telefono || !gmail || !password) {
     return res.status(400).json({ error: 'Faltan datos' });
   }
-
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const sql = 'INSERT INTO users (nombre, apellidos, telefono, gmail, password) VALUES (?, ?, ?, ?, ?)';
-    
-    db.query(sql, [nombre, apellidos, telefono, gmail, hashedPassword], (err, result) => {
-      if (err) {
-        console.error('❌ Error al insertar usuario:', err);
-        return res.status(500).json({ error: 'Error en el servidor' });
-      }
-      res.status(201).json({ mensaje: 'Usuario creado', id: result.insertId });
-    });
+    const hashed = await bcrypt.hash(password, 10);
+    const id = await logica.createUser(db, { nombre, apellidos, telefono, gmail, password: hashed });
+    res.status(201).json({ mensaje: 'Usuario creado', id });
   } catch (err) {
-    console.error('❌ Error al hashear la contraseña:', err);
+    console.error('❌ Error crear usuario:', err);
     res.status(500).json({ error: 'Error en el servidor' });
   }
 });
 
-// Listar todos los usuarios (GET /users)
-app.get('/users', (req, res) => {
-  db.query('SELECT id, nombre, apellidos, telefono, gmail FROM users', (err, rows) => {
-    if (err) {
-      console.error('❌ Error al obtener usuarios:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
-    res.json(rows);
-  });
+// Listar usuarios
+app.get('/users', async (req, res) => {
+  try {
+    const users = await logica.listUsers(db);
+    res.json(users);
+  } catch (err) {
+    console.error('❌ Error listar usuarios:', err);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 });
 
-// Actualizar un usuario (PUT /users/:id)
+// Actualizar usuario
 app.put('/users/:id', async (req, res) => {
   const { id } = req.params;
   const { nombre, apellidos, telefono, gmail, password } = req.body;
-
-  // Verificar que haya al menos un campo a actualizar
   if (!nombre && !apellidos && !telefono && !gmail && !password) {
-    return res.status(400).json({ error: 'Debes enviar al menos un campo para actualizar' });
+    return res.status(400).json({ error: 'Debes enviar al menos un campo' });
   }
+  try {
+    const fields = { nombre, apellidos, telefono, gmail };
+    if (password) fields.password = await bcrypt.hash(password, 10);
 
-  const fields = [];
-  const values = [];
-
-  if (nombre) {
-    fields.push('nombre = ?');
-    values.push(nombre);
-  }
-  if (apellidos) {
-    fields.push('apellidos = ?');
-    values.push(apellidos);
-  }
-  if (telefono) {
-    fields.push('telefono = ?');
-    values.push(telefono);
-  }
-  if (gmail) {
-    fields.push('gmail = ?');
-    values.push(gmail);
-  }
-  if (password) {
-    try {
-      const hashedPassword = await bcrypt.hash(password, 10);
-      fields.push('password = ?');
-      values.push(hashedPassword);
-    } catch (err) {
-      console.error('❌ Error al hashear la contraseña:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
-  }
-
-  values.push(id); // Para el WHERE
-
-  const sql = `UPDATE users SET ${fields.join(', ')} WHERE id = ?`;
-
-  db.query(sql, values, (err, result) => {
-    if (err) {
-      console.error('❌ Error al actualizar usuario:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
-
-    if (result.affectedRows === 0) {
-      return res.status(404).json({ error: 'Usuario no encontrado' });
-    }
+    const affected = await logica.updateUser(db, id, fields);
+    if (affected === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
 
     res.json({ mensaje: 'Usuario actualizado' });
-  });
+  } catch (err) {
+    console.error('❌ Error actualizar usuario:', err);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 });
 
-// ------------------- MEDICIONES -------------------
+/* ---------- MEDICIONES ---------- */
 
-// Crear una medición (POST /mediciones)
-app.post('/mediciones', (req, res) => {
-  const { medicion1, medicion2, medicion3, user, hora, localizacion } = req.body;
-
-  if (!medicion1 || !user || !hora || !localizacion) {
+// Crear medición
+app.post('/mediciones', async (req, res) => {
+  const { tipomedicion, contador, medicion, user, hora, localizacion } = req.body;
+  if (!tipomedicion || medicion === undefined || !user || !hora || !localizacion) {
     return res.status(400).json({ error: 'Faltan datos obligatorios' });
   }
-
-  const sql = `
-    INSERT INTO mediciones (medicion1, medicion2, medicion3, user, hora, localizacion)
-    VALUES (?, ?, ?, ?, ?, ?)
-  `;
-  db.query(sql, [medicion1, medicion2, medicion3, user, hora, localizacion], (err, result) => {
-    if (err) {
-      console.error('❌ Error al insertar medición:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
-    res.status(201).json({ mensaje: 'Medición registrada', id: result.insertId });
-  });
+  try {
+    const id = await logica.createMedicion(db, { tipomedicion, contador, medicion, user, hora, localizacion });
+    res.status(201).json({ mensaje: 'Medición registrada', id });
+  } catch (err) {
+    console.error('❌ Error crear medición:', err);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 });
 
-// Listar todas las mediciones (GET /mediciones)
-app.get('/mediciones', (req, res) => {
-  db.query('SELECT * FROM mediciones', (err, rows) => {
-    if (err) {
-      console.error('❌ Error al obtener mediciones:', err);
-      return res.status(500).json({ error: 'Error en el servidor' });
-    }
-    res.json(rows);
-  });
+// Listar mediciones (con JOIN)
+app.get('/mediciones', async (req, res) => {
+  try {
+    const mediciones = await logica.listMediciones(db);
+    res.json(mediciones);
+  } catch (err) {
+    console.error('❌ Error listar mediciones:', err);
+    res.status(500).json({ error: 'Error en el servidor' });
+  }
 });
 
-// ------------------- SERVER -------------------
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor corriendo en http://localhost:${PORT}`);
-});
+/* ---------- START ---------- */
+if (require.main === module) {
+  app.listen(PORT, () => console.log(`🚀 Servidor en http://localhost:${PORT}`));
+} else {
+  module.exports = app;
+}
