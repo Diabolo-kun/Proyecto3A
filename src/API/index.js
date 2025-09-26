@@ -1,15 +1,23 @@
-// index.js
-// API que usa logica.js y Express
+/**
+npm init -y
+npm install express
+npm install mysql2
+npm install bcrypt
+node index.js
+npm install --save-dev jest //hacer los tests
+*/
 
 const express = require('express');
 const bcrypt = require('bcrypt');
-const db = require('./db');      // tu conexión real con mysql2
+const db = require('./db');
 const logica = require('./logica');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
+
+console.log(`init`);
 
 /* ---------- USERS ---------- */
 
