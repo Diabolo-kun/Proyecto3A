@@ -5,6 +5,8 @@ import android.os.StrictMode;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 
+import org.json.JSONObject;
+
 import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -46,6 +48,7 @@ public class ApiFormActivity extends AppCompatActivity {
             String baseUrl = buildBaseUrl();
             if (baseUrl != null) {
                 String json = buildJsonBody();
+                android.util.Log.d("API_DEBUG", "➡ JSON a enviar: " + json);
                 String res = sendRequest(baseUrl + "/mediciones", "POST", json);
                 txtResponse.setText(res);
             }
@@ -62,27 +65,32 @@ public class ApiFormActivity extends AppCompatActivity {
     }
 
     private String buildJsonBody() {
-        String tipomedicion = tipomedicionInput.getText().toString().trim();
-        String contador = contadorInput.getText().toString().trim();
-        String medicion = medicionInput.getText().toString().trim();
-        String user = userInput.getText().toString().trim();
-        String hora = horaInput.getText().toString().trim();
-        String localizacion = localizacionInput.getText().toString().trim();
+        try {
+            JSONObject obj = new JSONObject();
+            obj.put("tipomedicion", tipomedicionInput.getText().toString().trim().isEmpty() ? 0 :
+                    Integer.parseInt(tipomedicionInput.getText().toString().trim()));
+            if (!contadorInput.getText().toString().trim().isEmpty()) {
+                obj.put("contador", Integer.parseInt(contadorInput.getText().toString().trim()));
+            }
+            obj.put("medicion", medicionInput.getText().toString().trim().isEmpty() ? 0 :
+                    Double.parseDouble(medicionInput.getText().toString().trim()));
+            obj.put("user", userInput.getText().toString().trim().isEmpty() ? 0 :
+                    Integer.parseInt(userInput.getText().toString().trim()));
+            obj.put("hora", horaInput.getText().toString().trim());
+            obj.put("localizacion", localizacionInput.getText().toString().trim());
+            return obj.toString();
+        } catch (Exception e) {
+            return "{}"; // fallback seguro
 
-        StringBuilder sb = new StringBuilder("{");
-        sb.append("\"tipomedicion\":").append(tipomedicion.isEmpty() ? "0" : tipomedicion).append(",");
-        if (!contador.isEmpty()) sb.append("\"contador\":").append(contador).append(",");
-        sb.append("\"medicion\":").append(medicion.isEmpty() ? "0" : medicion).append(",");
-        sb.append("\"user\":").append(user.isEmpty() ? "0" : user).append(",");
-        sb.append("\"hora\":\"").append(hora).append("\",");
-        sb.append("\"localizacion\":\"").append(localizacion).append("\"");
-        sb.append("}");
-        return sb.toString();
+        }
     }
 
     private String sendRequest(String urlString, String method, String jsonBody) {
         HttpURLConnection conn = null;
         try {
+            android.util.Log.d("API_DEBUG", "🌍 URL: " + urlString);
+            android.util.Log.d("API_DEBUG", "🔨 Método: " + method);
+
             URL url = new URL(urlString);
             conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod(method);
@@ -91,24 +99,33 @@ public class ApiFormActivity extends AppCompatActivity {
 
             if ("POST".equalsIgnoreCase(method) && jsonBody != null) {
                 conn.setDoOutput(true);
+                android.util.Log.d("API_DEBUG", "📤 Enviando body...");
                 try (OutputStream os = conn.getOutputStream()) {
                     byte[] input = jsonBody.getBytes("utf-8");
                     os.write(input, 0, input.length);
                 }
             }
 
-            BufferedReader br = new BufferedReader(new InputStreamReader(
-                    conn.getInputStream(), "utf-8"));
+            int code = conn.getResponseCode();
+            android.util.Log.d("API_DEBUG", "📡 Código de respuesta: " + code);
 
+            InputStream is = code < HttpURLConnection.HTTP_BAD_REQUEST
+                    ? conn.getInputStream()
+                    : conn.getErrorStream();
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(is, "utf-8"));
             StringBuilder response = new StringBuilder();
             String line;
             while ((line = br.readLine()) != null) {
                 response.append(line.trim());
             }
 
+            android.util.Log.d("API_DEBUG", "✅ Respuesta cruda: " + response.toString());
+
             return "✅ Respuesta:\n" + response.toString();
 
         } catch (Exception e) {
+            android.util.Log.e("API_DEBUG", "❌ Error en sendRequest", e);
             return "❌ Error: " + e.getMessage();
         } finally {
             if (conn != null) conn.disconnect();

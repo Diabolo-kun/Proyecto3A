@@ -63,7 +63,7 @@ describe('Tests de logica.js', () => {
   test('updateUser sin campos válidos lanza error', async () => {
     await expect(logica.updateUser(db, 1, { invalido: 'x' }))
       .rejects
-      .toThrow('No hay campos válidos');
+      .toThrow('No hay campos válidos para actualizar');
   });
 
   /* ---------- MEDICIONES ---------- */
@@ -113,6 +113,52 @@ describe('Tests de logica.js', () => {
     expect(res).toEqual(fakeData);
     expect(db.query).toHaveBeenCalledWith(
       expect.stringContaining('JOIN users'),
+      expect.any(Array),
+      expect.any(Function)
+    );
+  });
+
+  /* ---------- TIPOMEDICION ---------- */
+
+  test('createTipoMedicion inserta tipomedicion y devuelve insertId', async () => {
+    db.query.mockImplementation((sql, params, cb) =>
+      cb(null, { insertId: 55 })
+    );
+
+    const id = await logica.createTipoMedicion(db, {
+      medida: 'Temperatura',
+      unidad: '°C',
+      txt: 'Medición ambiente',
+    });
+
+    expect(id).toBe(55);
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO tipomedicion'),
+      expect.any(Array),
+      expect.any(Function)
+    );
+  });
+
+  test('updateTipoMedicion actualiza campos y devuelve filas afectadas', async () => {
+    db.query.mockImplementation((sql, params, cb) =>
+      cb(null, { affectedRows: 1 })
+    );
+
+    const affected = await logica.updateTipoMedicion(db, 1, { medida: 'Humedad' });
+    expect(affected).toBe(1);
+    expect(db.query).toHaveBeenCalled();
+  });
+
+  test('listTipoMedicion devuelve lista de tipos', async () => {
+    const fakeTipos = [
+      { id: 1, medida: 'Temperatura', unidad: '°C', txt: 'Medición ambiente' },
+    ];
+    db.query.mockImplementation((sql, params, cb) => cb(null, fakeTipos));
+
+    const res = await logica.listTipoMedicion(db);
+    expect(res).toEqual(fakeTipos);
+    expect(db.query).toHaveBeenCalledWith(
+      expect.stringContaining('SELECT id, medida, unidad, txt FROM tipomedicion'),
       expect.any(Array),
       expect.any(Function)
     );
