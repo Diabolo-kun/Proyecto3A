@@ -5,38 +5,100 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context=".MainActivity"
+    android:padding="16dp">
 
     <Button
         android:id="@+id/botonBuscarDispositivosBTLE"
         android:text="Buscar Dispositivos BTLE nou 4"
         android:onClick="botonBuscarDispositivosBTLEPulsado"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/botonDetenerBusquedaDispositivosBTLE"
         android:text="Detener búsaqueda Dispositivos BTLE"
         android:onClick="botonDetenerBusquedaDispositivosBTLEPulsado"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Campo de texto -->
+    <EditText
+        android:id="@+id/TextBusqueda"
+        android:hint="Escribe aquí..."
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        android:inputType="text" />
 
     <Button
         android:id="@+id/botonBuscarNuestroDispositivoBTLE"
         android:text="Buscar nuestro dispositivo  BTLE"
         android:onClick="botonBuscarNuestroDispositivoBTLEPulsado"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        />
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/botonAPI"
         android:text="Envio personalizado API"
         android:onClick="AbrirAPI"
         android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <!-- Campo de texto -->
+    <EditText
+        android:id="@+id/editTextEntrada"
+        android:hint="Escribe aquí la ip"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        />
+        android:inputType="text" />
+
+    <!-- Dos valores en horizontal -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:layout_marginTop="12dp">
+
+        <TextView
+            android:id="@+id/valor1"
+            android:text="Valor major"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="16sp" />
+
+        <TextView
+            android:id="@+id/valor2"
+            android:text="Valor minor"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:gravity="center"
+            android:textSize="16sp" />
+    </LinearLayout>
+
+    <!-- CheckBox y Botón de enviar en horizontal -->
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_vertical"
+        android:layout_marginTop="12dp">
+
+        <CheckBox
+            android:id="@+id/checkBoxConfirmacion"
+            android:text="Enviar al recibir"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/botonEnviar"
+            android:text="Enviar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp" />
+    </LinearLayout>
 
 </android.widget.LinearLayout>

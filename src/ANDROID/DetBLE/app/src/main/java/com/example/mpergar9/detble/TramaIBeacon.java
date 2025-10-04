@@ -90,7 +90,19 @@ public class TramaIBeacon {
     // -------------------------------------------------------------------------------
     // -------------------------------------------------------------------------------
     public TramaIBeacon(byte[] bytes ) {
-        this.losBytes = bytes;
+        if (bytes.length >= 3 &&
+                (bytes[0] & 0xFF) == 0x02 &&
+                (bytes[1] & 0xFF) == 0x01 &&
+                (bytes[2] & 0xFF) == 0x06) {
+            // Ya tiene flags
+            this.losBytes = bytes;
+        } else {
+            // No tiene flags → añadirlas al inicio
+            byte[] flags = new byte[]{ 0x02, 0x01, 0x06 };
+            this.losBytes = new byte[flags.length + bytes.length];
+            System.arraycopy(flags, 0, this.losBytes, 0, flags.length);
+            System.arraycopy(bytes, 0, this.losBytes, flags.length, bytes.length);
+        }
 
         prefijo = Arrays.copyOfRange(losBytes, 0, 8+1 ); // 9 bytes
         uuid = Arrays.copyOfRange(losBytes, 9, 24+1 ); // 16 bytes
