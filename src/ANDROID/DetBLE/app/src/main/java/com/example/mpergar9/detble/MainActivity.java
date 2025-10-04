@@ -90,7 +90,56 @@ public class MainActivity extends AppCompatActivity {
         Log.d(ETIQUETA_LOG, "Enviando → Major: "
                 + majorParte1 + "-" + majorParte2
                 + ", Minor: " + minorGuardado);
-        String ip = editTextEntrada.getText().toString().trim();
+        try {
+            // API helper
+            LogicaAPI api = new LogicaAPI();
+
+            // Datos requeridos
+            String tipomedicion = majorParte1;        // parte 1 del major
+            String contador = majorParte2;            // parte 2 del major
+            String medicion = String.valueOf(minorGuardado); // minor como medida
+            String user = "1";                        // fijo
+
+            // Fecha y hora actual
+            java.text.SimpleDateFormat sdf = new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+            String hora = sdf.format(new java.util.Date());
+
+            // Localización actual
+            String localizacion = "0,0"; // por defecto
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                android.location.LocationManager lm = (android.location.LocationManager) getSystemService(LOCATION_SERVICE);
+                android.location.Location loc = lm.getLastKnownLocation(android.location.LocationManager.GPS_PROVIDER);
+                if (loc == null) {
+                    loc = lm.getLastKnownLocation(android.location.LocationManager.NETWORK_PROVIDER);
+                }
+                if (loc != null) {
+                    localizacion = loc.getLatitude() + "," + loc.getLongitude();
+                }
+            } else {
+                Log.e(ETIQUETA_LOG, "No hay permisos de localización");
+            }
+
+            // Construimos JSON
+            String jsonBody = api.buildJsonBody(tipomedicion, contador, medicion, user, hora, localizacion);
+
+            // Dirección IP (la sacamos del EditText)
+            String ip = editTextEntrada.getText().toString().trim();
+            if (ip.isEmpty()) {
+                Toast.makeText(this, "Introduce la IP del servidor", Toast.LENGTH_SHORT).show();
+                return;
+            }
+
+            // Llamada POST en segundo plano (para no bloquear la UI)
+            new Thread(() -> {
+                String respuesta = api.postMedicion(ip, jsonBody);
+                runOnUiThread(() -> Toast.makeText(this, respuesta, Toast.LENGTH_LONG).show());
+            }).start();
+
+        } catch (Exception e) {
+            Log.e(ETIQUETA_LOG, "Error en enviarDatos()", e);
+            Toast.makeText(this, "Error enviando datos: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
+
     }
 
     public void botonEnviarPulsado(View v) {
