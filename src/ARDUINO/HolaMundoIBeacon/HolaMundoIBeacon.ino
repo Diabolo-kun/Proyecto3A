@@ -146,12 +146,10 @@ void loop () {
   // 
   // mido y publico
   // 
-  int valorTemperatura = elMedidor.medirTemperatura();
+  //int valorTemperatura = elMedidor.medirTemperatura();
   
-  elPublicador.publicarTemperatura( valorTemperatura, 
-									cont,
-									1000 // intervalo de emisión
-									);
+  
+  //elPublicador.publicarTemperatura( valorTemperatura, cont,	1000);
 
   // 
   // prueba para emitir un iBeacon y poner
@@ -162,7 +160,7 @@ void loop () {
   // 
   char datos[21] = {'H', 'o', 'l', 'a','H', 'o', 'l', 'a','H', 'o', 'l', 'a','H', 'o', 'l', 'a','H', 'o', 'l', 'a','H' };
 
-  elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( &datos[0], 21 );
+  //elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( &datos[0], 21 );
   //elPublicador.laEmisora.emitirAnuncioIBeaconLibre ( "MolaMolaMolaMolaMolaM", 21 );
 
   esperar( 2000 );

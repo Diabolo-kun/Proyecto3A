@@ -66,24 +66,28 @@ public class MainActivity extends AppCompatActivity {
     private String majorParte2 = "00";
 
     private void actualizarValoresIBeacon(int major, int minor) {
+        // Separamos tipo y contador
+        int tipoMedicion = (major >> 8) & 0xFF;  // bits altos
+        int contador = major & 0xFF;             // bits bajos
+
         majorGuardado = major;
         minorGuardado = minor;
 
-        // Convertimos a 4 dígitos con ceros a la izquierda
-        String majorStr = String.format("%04d", major);
-        majorParte1 = majorStr.substring(0, 2);
-        majorParte2 = majorStr.substring(2, 4);
+        majorParte1 = String.valueOf(tipoMedicion);
+        majorParte2 = String.valueOf(contador);
 
+        // Mostramos los valores por pantalla
         if (textValorMajor != null && textValorMinor != null) {
-            textValorMajor.setText("Valor major:( " + majorParte1 + " - " + majorParte2 + " )");
-            textValorMinor.setText("Valor minor: " + minor);
+            textValorMajor.setText("Major:( " + tipoMedicion + "  |  " + contador + " ) ");
+            textValorMinor.setText("Minor: " + minor);
         }
 
-        // Si el checkbox está activado, enviamos automáticamente
+        // Envío automático si está activado
         if (checkBoxConfirmacion.isChecked()) {
             enviarDatos();
         }
     }
+
 
     private void enviarDatos() {
         // Aquí defines qué quieres hacer con los valores
@@ -272,12 +276,27 @@ public class MainActivity extends AppCompatActivity {
                 Log.d(ETIQUETA_LOG, "Dispositivo encontrado: " + dispositivoBuscado);
                 mostrarInformacionDispositivoBTLE(resultado);
 
-                //Actualizamos los TextView con major/minor
+                // Obtenemos la trama iBeacon
                 TramaIBeacon tib = new TramaIBeacon(resultado.getScanRecord().getBytes());
                 int major = Utilidades.bytesToInt(tib.getMajor());
                 int minor = Utilidades.bytesToInt(tib.getMinor());
+
+                // 🔹 Separar los bytes del major
+                int tipoMedicion = (major >> 8) & 0xFF;  // byte alto → tipo de medición
+                int contador = major & 0xFF;             // byte bajo → contador
+
+                // Mostrar en log para depurar
+                Log.d(ETIQUETA_LOG, "------------------------------");
+                Log.d(ETIQUETA_LOG, "Major completo: " + major);
+                Log.d(ETIQUETA_LOG, "Tipo de medición: " + tipoMedicion);
+                Log.d(ETIQUETA_LOG, "Contador: " + contador);
+                Log.d(ETIQUETA_LOG, "Minor (valor medición): " + minor);
+                Log.d(ETIQUETA_LOG, "------------------------------");
+
+                // Si quieres seguir usando tu lógica original:
                 actualizarValoresIBeacon(major, minor);
             }
+
 
             @Override
             public void onBatchScanResults(List<ScanResult> results) {
