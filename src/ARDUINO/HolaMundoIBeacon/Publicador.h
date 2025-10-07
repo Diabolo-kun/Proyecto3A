@@ -58,39 +58,27 @@ public:
 
   // ............................................................
   // ............................................................
-  void publicarCO2( int16_t valorCO2, uint8_t contador,
-					long tiempoEspera ) {
+  void publicarCO2(int16_t valorCO2, uint8_t contador, long tiempoEspera) {
+    uint16_t major = (MedicionesID::CO2 << 8) + contador;
 
-	//
-	// 1. empezamos anuncio
-	//
-	uint16_t major = (MedicionesID::CO2 << 8) + contador;
-	(*this).laEmisora.emitirAnuncioIBeacon( (*this).beaconUUID, 
-											major,
-											valorCO2, // minor
-											(*this).RSSI // rssi
-									);
+    // Empezamos anuncio
+    (*this).laEmisora.emitirAnuncioIBeacon((*this).beaconUUID, major, valorCO2, (*this).RSSI);
 
-	/*
-	Globales::elPuerto.escribir( "   publicarCO2(): valor=" );
-	Globales::elPuerto.escribir( valorCO2 );
-	Globales::elPuerto.escribir( "   contador=" );
-	Globales::elPuerto.escribir( contador );
-	Globales::elPuerto.escribir( "   todo="  );
-	Globales::elPuerto.escribir( major );
-	Globales::elPuerto.escribir( "\n" );
-	*/
+    Globales::elPuerto.escribir( "   publicarCO2(): valor=" );
+	  Globales::elPuerto.escribir( valorCO2 );
+	  Globales::elPuerto.escribir( "   contador=" );
+	  Globales::elPuerto.escribir( contador );
+	  Globales::elPuerto.escribir( "   todo="  );
+	  Globales::elPuerto.escribir( major );
+	  Globales::elPuerto.escribir( "\n" );
 
-	//
-	// 2. esperamos el tiempo que nos digan
-	//
-	esperar( tiempoEspera );
+    // Si quieres mantener la medición visible durante un tiempo, espera el tiempo indicado
+    esperar(tiempoEspera);
 
-	//
-	// 3. paramos anuncio
-	//
-	(*this).laEmisora.detenerAnuncio();
-  } // ()
+    // Finalmente, detenemos el anuncio
+    (*this).laEmisora.detenerAnuncio();
+}
+
 
   // ............................................................
   // ............................................................
@@ -103,6 +91,15 @@ public:
 											valorTemperatura, // minor
 											(*this).RSSI // rssi
 									);
+
+  Globales::elPuerto.escribir( "   publicarTemperatura(): valor=" );
+	Globales::elPuerto.escribir( valorTemperatura );
+	Globales::elPuerto.escribir( "   contador=" );
+	Globales::elPuerto.escribir( contador );
+	Globales::elPuerto.escribir( "   todo="  );
+	Globales::elPuerto.escribir( major );
+	Globales::elPuerto.escribir( "\n" );                
+
 	esperar( tiempoEspera );
 
 	(*this).laEmisora.detenerAnuncio();

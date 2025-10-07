@@ -167,7 +167,7 @@ void loop () {
 
   esperar( 2000 );
 
-  elPublicador.laEmisora.detenerAnuncio();
+  //elPublicador.laEmisora.detenerAnuncio();
   
   // 
   // 
