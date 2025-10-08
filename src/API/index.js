@@ -11,8 +11,11 @@ const bcrypt = require('bcrypt');
 const db = require('./db');
 const logica = require('./logica');
 const bodyManual = require('./bodyManual');
+const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3000;
+
+app.use(cors());
 
 console.log(`init`);
 

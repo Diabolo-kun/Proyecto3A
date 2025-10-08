@@ -1,0 +1,28 @@
+body {
+  font-family: Arial, sans-serif;
+  margin: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#recargarBtn {
+  margin-bottom: 15px;
+  padding: 8px 16px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#recargarBtn:hover {
+  background-color: #0056b3;
+}
+
+table.dataTable {
+  border-collapse: collapse;
+  width: 100%;
+}
